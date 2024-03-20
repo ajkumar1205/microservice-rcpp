@@ -1,91 +1,142 @@
-use actix_web::post;
-use actix_web::{App, HttpServer, get, web::Json};
-use serde::{Serialize, Deserialize};
-
-
-
-use std::io::Result;
-
-
 mod lib;
 use lib::c;
 use lib::cpp;
 use lib::rust;
+use tonic::{transport::Server, Request, Response, Status};
+use api::{CodeRequest, CodeResponse};
+use api::c_code_server::{CCode, CCodeServer};
+use api::cpp_code_server::{CppCode, CppCodeServer};
+use api::rust_code_server::{RustCode, RustCodeServer};
 
-#[derive(Serialize)]
-struct Msg {
-    error: bool,
-    message: String
+pub mod api {
+    tonic::include_proto!("api");
 }
 
-#[derive(Deserialize)]
-struct CodeRequest {
-    code: String,
-    input: String
-}
+#[derive(Debug, Default)]
+pub struct CCodeService {}
 
-#[get("/")]
-async fn index() -> Json<Msg> {
-    Json(Msg { error: false, message: "API Endpoints\n\t\"/\" -> For this message\n\t\"/c\" -> For C\n\t\"/cpp\" -> For Cpp\n\"/rust\" -> For Rust".to_string() })
-}
+#[tonic::async_trait]
+impl CCode for CCodeService {
+    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
+        println!("Request is there {:?}", request);
 
+        let req = request.into_inner();
 
-#[post("/c")]
-async fn c_request(creq: Json<CodeRequest>) -> Json<Msg> {
-    if c::write_in_file(creq.code.clone()).is_some() {
-        return Json(Msg { error: true, message: "Unable to parse the Code".to_string()});
-    }
+        let err = c::write_in_file(req.code);
 
-    let out = c::compile();
-    if out.as_ref().is_some_and(|str| str.len()>1) {
-        return Json(Msg { error: true, message: out.unwrap()});
-    }else {
-        let out = c::execute(creq.input.clone());
-        return Json(Msg { error: false, message: out});
-    }
-}
-
-#[post("/cpp")]
-async fn cpp_request(creq: Json<CodeRequest>) -> Json<Msg> {
-    if cpp::write_in_file(creq.code.clone()).is_some() {
-        return Json(Msg { error: true, message: "Unable to parse the Code".to_string()});
-    }
-    
-    let out = cpp::compile();
-    if out.as_ref().is_some_and(|str| str.len()>1) {
-        return Json(Msg { error: true, message: out.unwrap()});
-    }else {
-        let out = cpp::execute(creq.input.clone());
-        return Json(Msg { error: false, message: out});
-    }
-}
-
-#[post("/rust")]
-async fn rust_request(creq: Json<CodeRequest>) -> Json<Msg> {
-    if rust::write_in_file(creq.code.clone()).is_some() {
-        return Json(Msg { error: true, message: "Unable to parse the Code".to_string()});
-    }
-    
-    let out = rust::compile();
-    if out.as_ref().is_some_and(|str| str.len()>1) {
-        return Json(Msg { error: true, message: out.unwrap()});
-    }else {
-        let out = rust::execute(creq.input.clone());
-        return Json(Msg { error: false, message: out});
-    }
-}
-
-#[actix_web::main]
-async fn main()-> Result<()> {
-    HttpServer::new(||{
-            App::new()
-            .service(index)
-            .service(c_request)
-            .service(cpp_request)
-            .service(rust_request)
+        match err {
+            Ok(_) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
         }
-    ).
-    bind(("127.0.0.0", 8000))?
-    .run()
-    .await
+
+        let err = c::compile();
+
+        match err {
+            Ok(()) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
+        }
+
+        let res = c::execute(req.input);
+
+        Ok(Response::new(CodeResponse {error:false, body: res}))
+    }
+}
+
+
+
+#[derive(Debug, Default)]
+pub struct CppCodeService {}
+
+#[tonic::async_trait]
+impl CppCode for CppCodeService {
+    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
+        println!("Request is there {:?}", request);
+
+        let req = request.into_inner();
+
+        let err = cpp::write_in_file(req.code);
+
+        match err {
+            Ok(_) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
+        }
+
+        let err = cpp::compile();
+
+        match err {
+            Ok(()) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
+        }
+
+        let res = cpp::execute(req.input);
+
+        Ok(Response::new(CodeResponse {error:false, body: res}))
+    }
+}
+
+
+
+#[derive(Debug, Default)]
+pub struct RustCodeService {}
+
+#[tonic::async_trait]
+impl RustCode for RustCodeService {
+    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
+        println!("Request is there {:?}", request);
+
+        let req = request.into_inner();
+
+        let err = rust::write_in_file(req.code);
+
+        match err {
+            Ok(_) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
+        }
+
+        let err = rust::compile();
+
+        match err {
+            Ok(()) => {}
+            Err(e) => {
+                let res = CodeResponse{ error: true, body: e.to_string()};
+                return Ok(Response::new(res));
+            }
+        }
+
+        let res = rust::execute(req.input);
+
+        Ok(Response::new(CodeResponse {error:false, body: res}))
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>>{
+    let add = "[::1]:50051".parse()?;
+    let cser = CCodeService::default();
+    let cppser = CppCodeService::default();
+    let rser = RustCodeService::default();
+
+    Server::builder()
+        .add_service(CCodeServer::new(cser))
+        .add_service(CppCodeServer::new(cppser))
+        .add_service(RustCodeServer::new(rser))
+        .serve(add)
+        .await?;
+
+    Ok(())
 }

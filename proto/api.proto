@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api;
+
+service CCode {
+    rpc take(CodeRequest) returns (CodeResponse);
+}
+
+service RustCode {
+    rpc take(CodeRequest) returns (CodeResponse);
+}
+
+service CppCode {
+    rpc take(CodeRequest) returns (CodeResponse);
+}
+
+message CodeRequest {
+    string code = 1;
+    string input = 2;
+}
+
+message CodeResponse {
+    bool error = 1;
+    string body = 2;
+}

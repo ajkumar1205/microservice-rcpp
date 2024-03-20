@@ -2,9 +2,18 @@
 name = "c-cpp-rust"
 version = "0.1.0"
 edition = "2021"
+author = "Ajay Kumar <iajkumar1205@gmail.com>"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
+
 [dependencies]
-actix-web = "4.4.1"
-serde = { version = "1.0", features = ["derive"] }
+# actix-web = "4.4.1"
+prost = "0.12.3"
+# serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
+tonic = "0.11.0"
+
+[build-dependencies]
+tonic-build = "0.10.2"

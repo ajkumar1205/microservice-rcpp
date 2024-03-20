@@ -5,12 +5,12 @@ pub mod c {
     use std::{fs::File, io::Write};
     use std::io::Error;
     use std::process::Command;
-    use std::sync::Mutex;
+    use std::sync::{Mutex, Arc};
 
     use super::BASE_PATH;
 
-    pub fn write_in_file(data: String) -> Option<Error> {
-        let file = Mutex::new(File::create(format!("{}/c/temp.c",BASE_PATH)).unwrap());
+    pub fn write_in_file(data: String) -> Result<(), Error> {
+        let file = Arc::new(Mutex::new(File::create(format!("{}/c/temp.c",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
         file.lock().unwrap().sync_all().unwrap();
@@ -19,13 +19,13 @@ pub mod c {
                 println!("Program is written in file /data/c/temp.c");
             }
             Err(e) => {
-                return Option::Some(e);
+                return Err(e);
             }
         }
-        Option::None
+        Ok(())
     }
 
-    pub fn compile() -> Option<String> {
+    pub fn compile() -> Result<(), Error> {
         let out = Command::new("gcc")
                                                 .arg("temp.c")
                                                 .current_dir(format!("{}/c",BASE_PATH))
@@ -34,19 +34,19 @@ pub mod c {
         match out {
             Ok(_) => {
                 let c = out.unwrap();
-                if c.stdout.is_empty() {
-                    return Option::Some(String::from_utf8_lossy(&c.stderr).to_string());
+                if !c.stdout.is_empty() {
+                    return Err(Error::new(std::io::ErrorKind::Other, String::from_utf8_lossy(&c.stderr).to_string()));
                 }
-                Option::None
+                Ok(())
             }
             Err(_) => {
-                Option::Some("Something went wrong during execution of:\n\t\tgcc temp.c".to_string())
+                Err(Error::new(std::io::ErrorKind::Other, "Something went wrong during execution of:\n\t\tgcc temp.c".to_string()))
             }
         }
     }
 
     pub fn execute(data: String) -> String {
-        let file = Mutex::new(File::create(format!("{}/c/in.log",BASE_PATH)).unwrap());
+        let file = Arc::new(Mutex::new(File::create(format!("{}/c/in.log",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
         match x {
@@ -76,23 +76,20 @@ pub mod c {
             }
         }
     }
-    // TRY COMPILING AND EXECUTING THE FILE TOGETHER USING BASH SCRIPT
-    // pub fn compile_n_runc() -> String {
 
-    // }
 }
 
 pub mod cpp {
     use std::{fs::File, io::Write};
     use std::io::Error;
     use std::process::Command;
-    use std::sync::Mutex;
+    use std::sync::{Mutex, Arc};
 
     use super::BASE_PATH;
 
-    pub fn write_in_file(data: String) -> Option<Error> {
+    pub fn write_in_file(data: String) -> Result<(), Error> {
 
-        let file = Mutex::new(File::create(format!("{}/cpp/temp.cpp",BASE_PATH)).unwrap());
+        let file = Arc::new(Mutex::new(File::create(format!("{}/cpp/temp.cpp",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
 
@@ -101,13 +98,13 @@ pub mod cpp {
                 println!("Program is written in file /data/cpp/temp.cpp");
             }
             Err(e) => {
-                return Option::Some(e);
+                return Err(e);
             }
         }
-        Option::None
+        Ok(())
     }
 
-    pub fn compile() -> Option<String> {
+    pub fn compile() -> Result<(), Error> {
         let out = Command::new("g++")
                                                 .arg("temp.cpp")
                                                 .current_dir(format!("{}/cpp",BASE_PATH))
@@ -117,18 +114,18 @@ pub mod cpp {
             Ok(_) => {
                 let c = out.unwrap();
                 if c.stdout.is_empty() {
-                    return Option::Some(String::from_utf8_lossy(&c.stderr).to_string());
+                    return Err(Error::new(std::io::ErrorKind::Other, String::from_utf8_lossy(&c.stderr).to_string()));
                 }
-                Option::None
+                Ok(())
             }
             Err(_) => {
-                Option::Some("Something went wrong during execution of:\n\t\tg++ temp.cpp".to_string())
+                Err(Error::new(std::io::ErrorKind::Other,"Something went wrong during execution of:\n\t\tg++ temp.cpp".to_string()))
             }
         }
     }
 
     pub fn execute(data: String) -> String {
-        let file = Mutex::new(File::create(format!("{}/cpp/in.log",BASE_PATH)).unwrap());
+        let file = Arc::new (Mutex::new(File::create(format!("{}/cpp/in.log",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
 
@@ -159,18 +156,19 @@ pub mod cpp {
             }
         }
     }
+
 }
 
 pub mod rust {
     use std::{fs::File, io::Write};
     use std::io::Error;
     use std::process::Command;
-    use std::sync::Mutex;
+    use std::sync::{Mutex, Arc};
 
     use super::BASE_PATH;
 
-    pub fn write_in_file(data: String) -> Option<Error> {
-        let file = Mutex::new(File::create(format!("{}/rust/temp.rs",BASE_PATH)).unwrap());
+    pub fn write_in_file(data: String) -> Result<(), Error> {
+        let file = Arc::new(Mutex::new(File::create(format!("{}/rust/temp.rs",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
         file.lock().unwrap().sync_all().unwrap();
@@ -179,13 +177,13 @@ pub mod rust {
                 println!("Program is written in file /data/rust/temp.rs");
             }
             Err(e) => {
-                return Option::Some(e);
+                return Err(e);
             }
         }
-        Option::None
+        Ok(())
     }
 
-    pub fn compile() -> Option<String> {
+    pub fn compile() -> Result<(), Error> {
         let out = Command::new("rustc")
                                                 .arg("temp.rs")
                                                 .current_dir(format!("{}/rust",BASE_PATH))
@@ -195,12 +193,12 @@ pub mod rust {
             Ok(_) => {
                 let c = out.unwrap();
                 if c.stdout.is_empty() {
-                    return Option::Some(String::from_utf8_lossy(&c.stderr).to_string());
+                    return Err(Error::new(std::io::ErrorKind::Other,String::from_utf8_lossy(&c.stderr).to_string()));
                 }
-                Option::None
+                Ok(())
             }
             Err(_) => {
-                Option::Some("Something went wrong during execution of:\n\t\trustc temp.rs".to_string())
+                Err(Error::new(std::io::ErrorKind::Other, "Something went wrong during execution of:\n\t\trustc temp.rs".to_string()))
             }
         }
     }
@@ -236,8 +234,5 @@ pub mod rust {
             }
         }
     }
-    // TRY COMPILING AND EXECUTING THE FILE TOGETHER USING BASH SCRIPT
-    // pub fn compile_n_runc() -> String {
-
-    // }
+    
 }
