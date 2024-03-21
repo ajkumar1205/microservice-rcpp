@@ -1,0 +1,35 @@
+name: Build and Push
+
+on:
+    push:
+        branches: [main]
+
+    
+jobs:
+    build: 
+        runs-on: ubuntu:latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Build Image
+              run: |
+                $DATE = $(date+"%H.%d.%m.%y")
+                $USERNAME = ${{ github.repository_owner }}
+                $REPONAME = ${{ github.repository }}
+                docker build . --tag ghcr.io/$USERNAME/$REPONAME:$DATE
+    
+    push:
+        runs-on: ubuntu:latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Login to ghcr.io
+              run: |
+                docker login ghcr.io -u ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Push to ghcr.io
+              run: |
+                $DATE = $(date+"%H.%d.%m.%y")
+                $USERNAME = ${{ github.repository_owner }}
+                $REPONAME = ${{ github.repository }}
+                docker push ghcr.io/$USERNAME/$REPONAME:$DATE
