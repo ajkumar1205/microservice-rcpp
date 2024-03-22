@@ -13,7 +13,7 @@ jobs:
             - uses: actions/checkout@v3
             - name: Build Image
               run: |
-                DATE=$(date+"%H.%d.%m.%y")
+                DATE=$(/bin/date+"%H.%d.%m.%y")
                 USERNAME=${{ github.repository_owner }}
                 REPONAME=${{ github.repository }}
                 docker build . --tag ghcr.io/$USERNAME/$REPONAME:$DATE
@@ -29,7 +29,7 @@ jobs:
             
             - name: Push to ghcr.io
               run: |
-                DATE=$(date+"%H.%d.%m.%y")
+                DATE=$(/bin/date+"%H.%d.%m.%y")
                 USERNAME=${{ github.repository_owner }}
                 REPONAME=${{ github.repository }}
                 docker push ghcr.io/$USERNAME/$REPONAME:$DATE
