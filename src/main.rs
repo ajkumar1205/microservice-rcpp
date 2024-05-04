@@ -127,7 +127,7 @@ impl RustCode for RustCodeService {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>>{
-    let add = "[::1]:50051".parse()?;
+    let add = "127.0.0.1:50051".parse()?;
     let cser = CCodeService::default();
     let cppser = CppCodeService::default();
     let rser = RustCodeService::default();
