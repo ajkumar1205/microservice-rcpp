@@ -22,16 +22,13 @@ WORKDIR /app
 COPY . .
 
 # Build the Rust application in release mode
-RUN cargo build --release
+RUN ~/.cargo/bin/cargo build --release
 
 # Use a minimal Ubuntu image for the final image
-FROM ubuntu:latest
+FROM gcr.io/distroless/cc-debian12
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /app/target/release/app /
+COPY --from=builder /app/target/release/microservice-rcpp /
 
-# Expose the port (if needed)
 EXPOSE 50051
 
-# Set the entrypoint to run the binary
-ENTRYPOINT ["/app"]
+CMD ["./microservice-rcpp"]

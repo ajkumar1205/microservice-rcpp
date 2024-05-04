@@ -1,11 +1,10 @@
 [package]
-name = "c-cpp-rust"
+name = "microservice-rcpp"
 version = "0.1.0"
 edition = "2021"
 author = "Ajay Kumar <iajkumar1205@gmail.com>"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 
 
 [dependencies]
