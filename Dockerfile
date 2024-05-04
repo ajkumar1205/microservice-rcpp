@@ -1,28 +1,18 @@
-# Use the latest Ubuntu image as the base
-FROM ubuntu:latest as builder
+FROM rust:1.78.0 AS build
 
-# Install required dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    gcc \
-    g++ \
-    protobuf-compiler \
-    libprotobuf-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Install protobuf compiler
+RUN USER=root apt-get update && apt-get install -y protobuf-compiler
 
-# Install Rust toolchain
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Set the working directory
 WORKDIR /app
 
-# Copy the source code
 COPY . .
 
-# Build the Rust application in release mode
-RUN ~/.cargo/bin/cargo build --release
+# Build your project
+RUN cargo build --release
+
+
+# Optionally build again after generating code
+RUN cargo build --release
 
 # Use a minimal Ubuntu image for the final image
 FROM gcr.io/distroless/cc-debian12
