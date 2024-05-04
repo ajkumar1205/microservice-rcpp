@@ -1,13 +1,12 @@
 mod lib;
+use api::c_code_server::{CCode, CCodeServer};
+use api::cpp_code_server::{CppCode, CppCodeServer};
+use api::rust_code_server::{RustCode, RustCodeServer};
+use api::{CodeRequest, CodeResponse};
 use lib::c;
 use lib::cpp;
 use lib::rust;
 use tonic::{transport::Server, Request, Response, Status};
-use api::{CodeRequest, CodeResponse};
-use api::c_code_server::{CCode, CCodeServer};
-use api::cpp_code_server::{CppCode, CppCodeServer};
-use api::rust_code_server::{RustCode, RustCodeServer};
-
 
 pub mod api {
     tonic::include_proto!("api");
@@ -28,7 +27,10 @@ impl CCode for CCodeService {
         match err {
             Ok(_) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
@@ -38,18 +40,22 @@ impl CCode for CCodeService {
         match err {
             Ok(()) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
 
         let res = c::execute(req.input);
 
-        Ok(Response::new(CodeResponse {error:false, body: res}))
+        Ok(Response::new(CodeResponse {
+            error: false,
+            body: res,
+        }))
     }
 }
-
-
 
 #[derive(Debug, Default)]
 pub struct CppCodeService {}
@@ -66,7 +72,10 @@ impl CppCode for CppCodeService {
         match err {
             Ok(_) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
@@ -76,18 +85,22 @@ impl CppCode for CppCodeService {
         match err {
             Ok(()) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
 
         let res = cpp::execute(req.input);
 
-        Ok(Response::new(CodeResponse {error:false, body: res}))
+        Ok(Response::new(CodeResponse {
+            error: false,
+            body: res,
+        }))
     }
 }
-
-
 
 #[derive(Debug, Default)]
 pub struct RustCodeService {}
@@ -104,7 +117,10 @@ impl RustCode for RustCodeService {
         match err {
             Ok(_) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
@@ -114,19 +130,25 @@ impl RustCode for RustCodeService {
         match err {
             Ok(()) => {}
             Err(e) => {
-                let res = CodeResponse{ error: true, body: e.to_string()};
+                let res = CodeResponse {
+                    error: true,
+                    body: e.to_string(),
+                };
                 return Ok(Response::new(res));
             }
         }
 
         let res = rust::execute(req.input);
 
-        Ok(Response::new(CodeResponse {error:false, body: res}))
+        Ok(Response::new(CodeResponse {
+            error: false,
+            body: res,
+        }))
     }
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>>{
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let add = "127.0.0.1:50051".parse()?;
     let cser = CCodeService::default();
     let cppser = CppCodeService::default();
@@ -138,6 +160,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>{
         .add_service(RustCodeServer::new(rser))
         .serve(add)
         .await?;
+
+    println!("Server is running on {}", add.to_string());
 
     Ok(())
 }
