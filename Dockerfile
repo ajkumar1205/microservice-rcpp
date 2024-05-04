@@ -17,7 +17,7 @@ RUN cargo build --release
 # Use a minimal Ubuntu image for the final image
 FROM gcr.io/distroless/cc-debian12
 
-COPY --from=builder /app/target/release/microservice-rcpp /
+COPY --from=build /app/target/release/microservice-rcpp /
 
 EXPOSE 50051
 
