@@ -30,6 +30,7 @@ impl CCode for CCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -43,6 +44,7 @@ impl CCode for CCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -52,7 +54,8 @@ impl CCode for CCodeService {
 
         Ok(Response::new(CodeResponse {
             error: false,
-            body: res,
+            body: res.0,
+            time: res.1,
         }))
     }
 }
@@ -75,6 +78,7 @@ impl CppCode for CppCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -88,6 +92,7 @@ impl CppCode for CppCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -97,7 +102,8 @@ impl CppCode for CppCodeService {
 
         Ok(Response::new(CodeResponse {
             error: false,
-            body: res,
+            body: res.0,
+            time: res.1
         }))
     }
 }
@@ -120,6 +126,7 @@ impl RustCode for RustCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -133,6 +140,7 @@ impl RustCode for RustCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
+                    time: 0
                 };
                 return Ok(Response::new(res));
             }
@@ -142,7 +150,8 @@ impl RustCode for RustCodeService {
 
         Ok(Response::new(CodeResponse {
             error: false,
-            body: res,
+            body: res.0,
+            time: res.1,
         }))
     }
 }

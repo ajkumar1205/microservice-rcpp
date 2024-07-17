@@ -45,7 +45,7 @@ pub mod c {
         }
     }
 
-    pub fn execute(data: String) -> String {
+    pub fn execute(data: String) -> (String, u64) {
         let file = Arc::new(Mutex::new(File::create(format!("{}/c/in.log",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
@@ -54,25 +54,27 @@ pub mod c {
                 println!("Input is written in file /data/c/in.log");
             }
             Err(_) => {
-                return "Something went wrong while parsing input".to_string().to_owned()
+                return ("Something went wrong while parsing input".to_string().to_owned(), 0)
             }
         }
         
+        let start = std::time::Instant::now();
         let out  = Command::new("./run.sh")
                                                     .current_dir(format!("{}/c", BASE_PATH))
                                                     .output();
+        let duration = start.elapsed();
         match out {
             Ok(_) => {
                 let c = out.unwrap();
                 if c.stdout.is_empty() {
-                    return String::from_utf8_lossy(&c.stderr).to_string();
+                    return (String::from_utf8_lossy(&c.stderr).to_string(), 0);
                 }
                 let out = String::from_utf8_lossy(&c.stdout).to_string();
                 println!("{}",out);
-                return out;
+                return (out, duration.as_nanos() as u64);
             }
             Err(_) => {
-                "Something went wrong during execution of:\n\t\t./temp.c".to_string().to_owned()
+                ("Something went wrong during execution of:\n\t\t./temp.c".to_string().to_owned(), 0)
             }
         }
     }
@@ -124,7 +126,7 @@ pub mod cpp {
         }
     }
 
-    pub fn execute(data: String) -> String {
+    pub fn execute(data: String) -> (String, u64) {
         let file = Arc::new (Mutex::new(File::create(format!("{}/cpp/in.log",BASE_PATH)).unwrap()));
         
         let x = file.lock().unwrap().write_all(data.as_bytes());
@@ -134,25 +136,26 @@ pub mod cpp {
                 println!("input is written in file /data/cpp/in.log");
             }
             Err(_) => {
-                "Something went wrong while parsing input";
+                return ("Something went wrong while parsing input".to_string().to_owned(), 0)
             }
         }
+        let start = std::time::Instant::now();
         let out = Command::new("./run.sh")
                                                 .current_dir(format!("{}/cpp",BASE_PATH))
                                                 .output();
-
+        let duration = start.elapsed();
         match out {
             Ok(_) => {
                 let c = out.unwrap();
                 if c.stdout.is_empty() {
-                    return String::from_utf8_lossy(&c.stderr).to_string();
+                    return (String::from_utf8_lossy(&c.stderr).to_string(), 0);
                 }
                 let out = String::from_utf8_lossy(&c.stdout).to_string();
                 println!("{}",out);
-                return out;
+                return (out, duration.as_nanos() as u64);
             }
             Err(_) => {
-                "Something went wrong during execution of:\n\t\t./temp.c".to_string()
+                ("Something went wrong during execution of:\n\t\t./temp.c".to_string(), 0)
             }
         }
     }
@@ -203,7 +206,7 @@ pub mod rust {
         }
     }
 
-    pub fn execute(data: String) -> String {
+    pub fn execute(data: String) -> (String, u64) {
         let mut file = File::create(format!("{}/rust/in.log",BASE_PATH)).unwrap();
         
         let x = file.write_all(data.as_bytes());
@@ -212,25 +215,27 @@ pub mod rust {
                 println!("Input is written in file /data/rust/in.log");
             }
             Err(_) => {
-                return "Something went wrong while parsing input".to_string().to_owned()
+                return ("Something went wrong while parsing input".to_string().to_owned(), 0);
             }
         }
         
+        let start = std::time::Instant::now();
         let out  = Command::new("./run.sh")
                                                     .current_dir(format!("{}/rust", BASE_PATH))
                                                     .output();
+        let duration = start.elapsed();
         match out {
             Ok(_) => {
                 let c = out.unwrap();
                 if c.stdout.is_empty() {
-                    return String::from_utf8_lossy(&c.stderr).to_string();
+                    return (String::from_utf8_lossy(&c.stderr).to_string(), 0);
                 }
                 let out = String::from_utf8_lossy(&c.stdout).to_string();
                 println!("{}",out);
-                return out;
+                return (out, duration.as_nanos() as u64);
             }
             Err(_) => {
-                "Something went wrong during execution of:\n\t\t./temp.c".to_string().to_owned()
+                ("Something went wrong during execution of:\n\t\t./temp.c".to_string().to_owned(), 0)
             }
         }
     }
