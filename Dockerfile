@@ -10,10 +10,6 @@ COPY . .
 # Build your project
 RUN cargo build --release
 
-
-# Optionally build again after generating code
-RUN cargo build --release
-
 # Use a minimal Ubuntu image for the final image
 FROM gcr.io/distroless/cc-debian12
 
