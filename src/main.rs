@@ -30,7 +30,7 @@ impl CCode for CCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -44,7 +44,7 @@ impl CCode for CCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -78,7 +78,7 @@ impl CppCode for CppCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -92,7 +92,7 @@ impl CppCode for CppCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -103,7 +103,7 @@ impl CppCode for CppCodeService {
         Ok(Response::new(CodeResponse {
             error: false,
             body: res.0,
-            time: res.1
+            time: res.1,
         }))
     }
 }
@@ -126,7 +126,7 @@ impl RustCode for RustCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -140,7 +140,7 @@ impl RustCode for RustCodeService {
                 let res = CodeResponse {
                     error: true,
                     body: e.to_string(),
-                    time: 0
+                    time: 0,
                 };
                 return Ok(Response::new(res));
             }
@@ -162,6 +162,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cser = CCodeService::default();
     let cppser = CppCodeService::default();
     let rser = RustCodeService::default();
+    println!("Server is running on {}", add);
 
     Server::builder()
         .add_service(CCodeServer::new(cser))
@@ -169,8 +170,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_service(RustCodeServer::new(rser))
         .serve(add)
         .await?;
-
-    println!("Server is running on {}", add.to_string());
 
     Ok(())
 }
