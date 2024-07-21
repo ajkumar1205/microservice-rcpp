@@ -2,25 +2,23 @@ syntax = "proto3";
 
 package api;
 
-service CCode {
-    rpc take(CodeRequest) returns (CodeResponse);
+service Code {
+    rpc post(CodeRequest) returns (CodeResponse);
 }
 
-service RustCode {
-    rpc take(CodeRequest) returns (CodeResponse);
-}
-
-service CppCode {
-    rpc take(CodeRequest) returns (CodeResponse);
+enum Language {
+    C = 0;
+    Rust = 1;
+    Cpp = 2;
 }
 
 message CodeRequest {
     string code = 1;
     string input = 2;
+    Language lang = 3;
 }
 
 message CodeResponse {
-    bool error = 1;
-    string body = 2;
-    uint64 time = 3;
+    string body = 1;
+    uint64 time = 2;
 }

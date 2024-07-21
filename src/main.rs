@@ -1,11 +1,10 @@
-mod lib;
-use api::c_code_server::{CCode, CCodeServer};
-use api::cpp_code_server::{CppCode, CppCodeServer};
-use api::rust_code_server::{RustCode, RustCodeServer};
-use api::{CodeRequest, CodeResponse};
-use lib::c;
-use lib::cpp;
-use lib::rust;
+mod utils;
+use std::borrow::Borrow;
+
+use api::{
+    code_server::{Code, CodeServer},
+    CodeRequest, CodeResponse,
+};
 use tonic::{transport::Server, Request, Response, Status};
 
 pub mod api {
@@ -13,162 +12,30 @@ pub mod api {
 }
 
 #[derive(Debug, Default)]
-pub struct CCodeService {}
+pub struct CodeService {}
 
 #[tonic::async_trait]
-impl CCode for CCodeService {
-    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
-        println!("Request is there {:?}", request);
-
+impl Code for CodeService {
+    async fn post(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
         let req = request.into_inner();
 
-        let err = c::write_in_file(req.code);
+        utils::write_in_file(req.borrow()).await?;
+        utils::compile(req.lang()).await?;
+        utils::execute(req).await?;
 
-        match err {
-            Ok(_) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let err = c::compile();
-
-        match err {
-            Ok(()) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let res = c::execute(req.input);
-
-        Ok(Response::new(CodeResponse {
-            error: false,
-            body: res.0,
-            time: res.1,
-        }))
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct CppCodeService {}
-
-#[tonic::async_trait]
-impl CppCode for CppCodeService {
-    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
-        println!("Request is there {:?}", request);
-
-        let req = request.into_inner();
-
-        let err = cpp::write_in_file(req.code);
-
-        match err {
-            Ok(_) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let err = cpp::compile();
-
-        match err {
-            Ok(()) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let res = cpp::execute(req.input);
-
-        Ok(Response::new(CodeResponse {
-            error: false,
-            body: res.0,
-            time: res.1,
-        }))
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct RustCodeService {}
-
-#[tonic::async_trait]
-impl RustCode for RustCodeService {
-    async fn take(&self, request: Request<CodeRequest>) -> Result<Response<CodeResponse>, Status> {
-        println!("Request is there {:?}", request);
-
-        let req = request.into_inner();
-
-        let err = rust::write_in_file(req.code);
-
-        match err {
-            Ok(_) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let err = rust::compile();
-
-        match err {
-            Ok(()) => {}
-            Err(e) => {
-                let res = CodeResponse {
-                    error: true,
-                    body: e.to_string(),
-                    time: 0,
-                };
-                return Ok(Response::new(res));
-            }
-        }
-
-        let res = rust::execute(req.input);
-
-        Ok(Response::new(CodeResponse {
-            error: false,
-            body: res.0,
-            time: res.1,
-        }))
+        Err(Status::internal("Some went unexpected"))
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let add = "127.0.0.1:50051".parse()?;
-    let cser = CCodeService::default();
-    let cppser = CppCodeService::default();
-    let rser = RustCodeService::default();
-    println!("Server is running on {}", add);
+    let adr = "127.0.0.1:50051".parse()?;
+    println!("Server is running on {}", adr);
+    let code_service = CodeService::default();
 
     Server::builder()
-        .add_service(CCodeServer::new(cser))
-        .add_service(CppCodeServer::new(cppser))
-        .add_service(RustCodeServer::new(rser))
-        .serve(add)
+        .add_service(CodeServer::new(code_service))
+        .serve(adr)
         .await?;
 
     Ok(())
