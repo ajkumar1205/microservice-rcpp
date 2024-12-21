@@ -1,6 +1,6 @@
 [package]
 name = "microservice-rcpp"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 author = "Ajay Kumar <iajkumar1205@gmail.com>"
 
@@ -8,8 +8,12 @@ author = "Ajay Kumar <iajkumar1205@gmail.com>"
 
 
 [dependencies]
+env_logger = "0.11.6"
+lazy_static = "1.5.0"
+log = "0.4.22"
 # actix-web = "4.4.1"
 prost = "0.12.3"
+tempfile = "3.14.0"
 # serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
 tonic = "0.11.0"
